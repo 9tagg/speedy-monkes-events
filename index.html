@@ -5,50 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Speedy Monkes V2 Events</title>
 <style>
-  /* Body & Fonts */
   body { margin:0; font-family: Arial, sans-serif; background:#0f172a; color:white; }
-  
-  /* Header */
   header { display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:#1e293b; position:sticky; top:0; z-index:10; }
   header h1 { margin:0; font-size:24px; }
 
-  /* Admin Panel */
-  #adminPanel { display:none; }
-  #adminPanel button { margin-left:10px; background:#3b82f6; color:white; border:none; border-radius:6px; padding:8px 12px; cursor:pointer; transition:0.2s; }
+  /* Admin label */
+  #adminLabel { cursor:pointer; padding:8px 12px; background:#3b82f6; border-radius:6px; }
+  #adminLabel:hover { background:#2563eb; }
+
+  /* Admin panel popup */
+  #adminPanel { display:none; margin-top:10px; }
+  #adminPanel button { margin:5px 0; background:#3b82f6; color:white; border:none; border-radius:6px; padding:8px 12px; cursor:pointer; display:block; }
   #adminPanel button:hover { background:#2563eb; }
 
-  /* Container */
   .container { max-width:800px; margin:auto; padding:20px; }
 
-  /* Cards */
   .card { background:#1e293b; border-radius:12px; padding:15px; margin-top:15px; box-shadow:0 2px 10px rgba(0,0,0,0.3); transition:0.2s; }
   .card:hover { transform: translateY(-2px); }
 
-  /* Inputs & Buttons */
   input { width:100%; padding:10px; margin:5px 0; border:none; border-radius:8px; background:#334155; color:white; }
   button { cursor:pointer; border:none; border-radius:6px; padding:8px 12px; transition:0.2s; }
   button:hover { opacity:0.85; }
   .delete { background:#ef4444; color:white; }
   .delete:hover { background:#dc2626; }
 
-  /* Countdown & Now */
   .countdown { color:#22d3ee; font-weight:bold; margin-top:5px; }
   .now { color:#f87171; font-weight:bold; margin-top:5px; }
 
-  /* Add Event Form */
   #addEventCard { display:none; margin-top:10px; }
 
-  /* Responsive */
   @media(max-width:600px){ header { flex-direction:column; align-items:flex-start; } }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>🐒 Speedy Monkes V2 Events</h1>
-  <div id="adminPanel">
-    <button onclick="toggleAddEvent()">Add Event</button>
-    <button onclick="logout()">Logout</button>
+  <h1>Speedy Monkes V2</h1>
+  <div>
+    <span id="adminLabel">Admin</span>
+    <div id="adminPanel">
+      <button onclick="toggleAddEvent()">Add Event</button>
+      <button onclick="logout()">Logout</button>
+    </div>
   </div>
 </header>
 
@@ -83,15 +81,15 @@ let events = JSON.parse(localStorage.getItem("events") || "[]");
 let loggedIn = false;
 
 function login(){
-  const u = document.getElementById("user").value;
-  const p = document.getElementById("pass").value;
+  const u=document.getElementById("user").value;
+  const p=document.getElementById("pass").value;
   if(ADMINS.find(a=>a.user===u && a.pass===p)){
     loggedIn=true;
-    document.getElementById("adminPanel").style.display="block";
     document.getElementById("loginCard").style.display="none";
-    render();
+    document.getElementById("adminPanel").style.display="block"; // show admin panel after login
     alert("Logged in!");
-  }else alert("Wrong login");
+    render();
+  } else alert("Wrong login");
 }
 
 function logout(){
@@ -103,7 +101,7 @@ function logout(){
 
 function toggleAddEvent(){
   const card=document.getElementById("addEventCard");
-  card.style.display=card.style.display==="none"?"block":"none";
+  card.style.display = card.style.display==="none"?"block":"none";
 }
 
 function addEvent(){
@@ -113,13 +111,12 @@ function addEvent(){
 
   events.push({ id:Date.now(), name:nameInput.value, time:timeInput.value });
   localStorage.setItem("events", JSON.stringify(events));
-
   nameInput.value=""; timeInput.value="";
   render();
 }
 
 function deleteEvent(id){
-  events=events.filter(e=>e.id!==id);
+  events = events.filter(e=>e.id!==id);
   localStorage.setItem("events", JSON.stringify(events));
   render();
 }
@@ -172,5 +169,6 @@ function render(){
 setInterval(render,1000);
 render();
 </script>
+
 </body>
 </html>
