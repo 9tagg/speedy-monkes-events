@@ -2,72 +2,46 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Speedy Monkes V2 Events</title>
-
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0f172a;
-  color: white;
-}
+  /* Body & Fonts */
+  body { margin:0; font-family: Arial, sans-serif; background:#0f172a; color:white; }
+  
+  /* Header */
+  header { display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:#1e293b; position:sticky; top:0; z-index:10; }
+  header h1 { margin:0; font-size:24px; }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  background: #1e293b;
-}
+  /* Admin Panel */
+  #adminPanel { display:none; }
+  #adminPanel button { margin-left:10px; background:#3b82f6; color:white; border:none; border-radius:6px; padding:8px 12px; cursor:pointer; transition:0.2s; }
+  #adminPanel button:hover { background:#2563eb; }
 
-h1 {
-  margin: 0;
-  font-size: 24px;
-}
+  /* Container */
+  .container { max-width:800px; margin:auto; padding:20px; }
 
-button {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-left: 5px;
-}
+  /* Cards */
+  .card { background:#1e293b; border-radius:12px; padding:15px; margin-top:15px; box-shadow:0 2px 10px rgba(0,0,0,0.3); transition:0.2s; }
+  .card:hover { transform: translateY(-2px); }
 
-button:hover { opacity: 0.85; }
+  /* Inputs & Buttons */
+  input { width:100%; padding:10px; margin:5px 0; border:none; border-radius:8px; background:#334155; color:white; }
+  button { cursor:pointer; border:none; border-radius:6px; padding:8px 12px; transition:0.2s; }
+  button:hover { opacity:0.85; }
+  .delete { background:#ef4444; color:white; }
+  .delete:hover { background:#dc2626; }
 
-.delete { background: #ef4444; color: white; }
-.delete:hover { background: #dc2626; }
+  /* Countdown & Now */
+  .countdown { color:#22d3ee; font-weight:bold; margin-top:5px; }
+  .now { color:#f87171; font-weight:bold; margin-top:5px; }
 
-#adminPanel { display: none; }
+  /* Add Event Form */
+  #addEventCard { display:none; margin-top:10px; }
 
-.container {
-  max-width: 800px;
-  margin: auto;
-  padding: 20px;
-}
-
-.card {
-  background: #1e293b;
-  border-radius: 12px;
-  padding: 15px;
-  margin-top: 15px;
-}
-
-input {
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  margin: 5px 0;
-  background: #334155;
-  color: white;
-  width: 100%;
-}
-
-.countdown { color: #22d3ee; }
-.now { color: #f87171; font-weight: bold; margin-top: 5px; }
+  /* Responsive */
+  @media(max-width:600px){ header { flex-direction:column; align-items:flex-start; } }
 </style>
 </head>
-
 <body>
 
 <header>
@@ -80,136 +54,123 @@ input {
 
 <div class="container">
 
-<!-- LOGIN -->
-<div class="card" id="loginCard">
-  <input id="user" placeholder="Username">
-  <input id="pass" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-</div>
+  <!-- LOGIN CARD -->
+  <div class="card" id="loginCard">
+    <input id="user" placeholder="Username">
+    <input id="pass" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>
 
-<!-- ADD EVENT FORM -->
-<div class="card" id="addEventCard" style="display:none;">
-  <input id="name" placeholder="Event Name">
-  <input id="time" type="datetime-local">
-  <button onclick="addEvent()">Save Event</button>
-</div>
+  <!-- ADD EVENT CARD -->
+  <div class="card" id="addEventCard">
+    <input id="name" placeholder="Event Name">
+    <input id="time" type="datetime-local">
+    <button onclick="addEvent()">Save Event</button>
+  </div>
 
-<!-- EVENTS -->
-<div id="events"></div>
+  <!-- EVENTS -->
+  <div id="events"></div>
 
 </div>
 
 <script>
 const ADMINS = [
-  { user: "admin", pass: "1234" },
-  { user: "alex", pass: "5678" }
+  { user:"admin", pass:"1234" },
+  { user:"alex", pass:"5678" }
 ];
 
 let events = JSON.parse(localStorage.getItem("events") || "[]");
 let loggedIn = false;
 
-function login() {
+function login(){
   const u = document.getElementById("user").value;
   const p = document.getElementById("pass").value;
-
-  if (ADMINS.find(a => a.user === u && a.pass === p)) {
-    loggedIn = true;
-    document.getElementById("adminPanel").style.display = "block";
-    document.getElementById("loginCard").style.display = "none";
-    alert("Logged in");
+  if(ADMINS.find(a=>a.user===u && a.pass===p)){
+    loggedIn=true;
+    document.getElementById("adminPanel").style.display="block";
+    document.getElementById("loginCard").style.display="none";
     render();
-  } else {
-    alert("Wrong login");
-  }
+    alert("Logged in!");
+  }else alert("Wrong login");
 }
 
-function logout() {
-  loggedIn = false;
-  document.getElementById("adminPanel").style.display = "none";
-  document.getElementById("loginCard").style.display = "block";
-  document.getElementById("addEventCard").style.display = "none";
+function logout(){
+  loggedIn=false;
+  document.getElementById("adminPanel").style.display="none";
+  document.getElementById("loginCard").style.display="block";
+  document.getElementById("addEventCard").style.display="none";
 }
 
-function toggleAddEvent() {
-  const card = document.getElementById("addEventCard");
-  card.style.display = card.style.display === "none" ? "block" : "none";
+function toggleAddEvent(){
+  const card=document.getElementById("addEventCard");
+  card.style.display=card.style.display==="none"?"block":"none";
 }
 
-function addEvent() {
-  const nameInput = document.getElementById("name");
-  const timeInput = document.getElementById("time");
-  if (!nameInput.value || !timeInput.value) return;
+function addEvent(){
+  const nameInput=document.getElementById("name");
+  const timeInput=document.getElementById("time");
+  if(!nameInput.value || !timeInput.value) return;
 
-  events.push({
-    id: Date.now(),
-    name: nameInput.value,
-    time: timeInput.value
-  });
-
+  events.push({ id:Date.now(), name:nameInput.value, time:timeInput.value });
   localStorage.setItem("events", JSON.stringify(events));
 
-  // clear inputs
-  nameInput.value = "";
-  timeInput.value = "";
-
+  nameInput.value=""; timeInput.value="";
   render();
 }
 
-function deleteEvent(id) {
-  events = events.filter(e => e.id !== id);
+function deleteEvent(id){
+  events=events.filter(e=>e.id!==id);
   localStorage.setItem("events", JSON.stringify(events));
   render();
 }
 
-function getCountdown(t) {
-  const diff = new Date(t) - new Date();
-  if (diff <= 0) return "Started";
-  const d = Math.floor(diff / 86400000);
-  const h = Math.floor(diff / 3600000) % 24;
-  const m = Math.floor(diff / 60000) % 60;
-  return `${d}d ${h}h ${m}m`;
+function getCountdown(t){
+  const diff=new Date(t)-new Date();
+  if(diff<=0) return "Started";
+  const d=Math.floor(diff/86400000);
+  const h=Math.floor(diff/3600000)%24;
+  const m=Math.floor(diff/60000)%60;
+  const s=Math.floor(diff/1000)%60;
+  return `${d}d ${h}h ${m}m ${s}s`;
 }
 
-function isNow(t) {
-  return Math.abs(new Date() - new Date(t)) < 60000;
+function isNow(t){
+  return Math.abs(new Date()-new Date(t))<60000;
 }
 
-function render() {
-  const container = document.getElementById("events");
-  container.innerHTML = "";
-
-  const grouped = {};
-  events.forEach(e => {
-    const date = new Date(e.time).toDateString();
-    if (!grouped[date]) grouped[date] = [];
+function render(){
+  const container=document.getElementById("events");
+  container.innerHTML="";
+  const grouped={};
+  events.forEach(e=>{
+    const date=new Date(e.time).toDateString();
+    if(!grouped[date]) grouped[date]=[];
     grouped[date].push(e);
   });
 
-  for (let date in grouped) {
-    const section = document.createElement("div");
-    section.className = "card";
-    section.innerHTML = `<h3>${date}</h3>`;
+  for(let date in grouped){
+    const section=document.createElement("div");
+    section.className="card";
+    section.innerHTML=`<h3>${date}</h3>`;
 
-    grouped[date].forEach(e => {
-      const div = document.createElement("div");
-      div.className = "card";
-      div.innerHTML = `
+    grouped[date].forEach(e=>{
+      const div=document.createElement("div");
+      div.className="card";
+      div.innerHTML=`
         <b>${e.name}</b><br>
         ${new Date(e.time).toLocaleTimeString()}<br>
         <div class="countdown">Starts in: ${getCountdown(e.time)}</div>
-        ${isNow(e.time) ? `<div class="now">Event Happening Now! Check announcements in Discord for the code!</div>` : ""}
-        ${loggedIn ? `<button class="delete" onclick="deleteEvent(${e.id})">Delete</button>` : ""}
+        ${isNow(e.time)?`<div class="now">Event Happening Now! Check announcements in Discord for the code!</div>`:""}
+        ${loggedIn?`<button class="delete" onclick="deleteEvent(${e.id})">Delete</button>`:""}
       `;
       section.appendChild(div);
     });
-
     container.appendChild(section);
   }
 }
 
-setInterval(render, 1000);
+setInterval(render,1000);
 render();
 </script>
-
 </body>
 </html>
