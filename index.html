@@ -3,37 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Speedy Monkes V2 Events</title>
+<title>Speedy Monkes Event Hub</title>
 
 <style>
 body {
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:Arial;
   background:#0f172a;
   color:white;
 }
 
-/* HEADER */
 header {
   display:flex;
   justify-content:space-between;
-  align-items:center;
   padding:10px 20px;
   background:#1e293b;
 }
 
-h1 { margin:0; }
-
-/* ADMIN BUTTON */
 #adminBtn {
-  cursor:pointer;
-  padding:8px 12px;
   background:#3b82f6;
+  padding:8px 12px;
   border-radius:6px;
+  cursor:pointer;
 }
-#adminBtn:hover { background:#2563eb; }
 
-/* ADMIN PANEL */
 #adminPanel {
   display:none;
   position:absolute;
@@ -43,31 +36,7 @@ h1 { margin:0; }
   padding:10px;
   border-radius:10px;
 }
-#adminPanel button {
-  display:block;
-  margin-top:5px;
-  width:100%;
-}
 
-/* POPUP */
-#loginPopup {
-  display:none;
-  position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.7);
-  justify-content:center;
-  align-items:center;
-}
-.popupContent {
-  background:#1e293b;
-  padding:20px;
-  border-radius:12px;
-  width:300px;
-  text-align:center;
-}
-
-/* MAIN */
 .container {
   max-width:800px;
   margin:auto;
@@ -76,60 +45,67 @@ h1 { margin:0; }
 
 .card {
   background:#1e293b;
-  border-radius:12px;
   padding:15px;
+  border-radius:12px;
   margin-top:15px;
 }
 
-input, button {
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  margin:5px 0;
-}
-
-input {
+input, textarea {
   width:100%;
+  padding:10px;
+  margin:5px 0;
   background:#334155;
   color:white;
+  border:none;
+  border-radius:8px;
 }
 
 button {
+  padding:10px;
   background:#3b82f6;
   color:white;
+  border:none;
+  border-radius:8px;
   cursor:pointer;
 }
-button:hover { opacity:0.85; }
 
-.delete { background:#ef4444; }
-.delete:hover { background:#dc2626; }
+#loginPopup {
+  display:none;
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.7);
+  justify-content:center;
+  align-items:center;
+}
 
-.countdown { color:#22d3ee; }
-.now { color:#f87171; font-weight:bold; margin-top:5px; }
+.popupContent {
+  background:#1e293b;
+  padding:20px;
+  border-radius:12px;
+}
 
-#addEventCard { display:none; }
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1>Speedy Monkes V2 Events</h1>
-
+  <h2>Speedy Monkes Event Hub</h2>
   <div style="position:relative;">
     <span id="adminBtn" onclick="openLogin()">Admin</span>
-
     <div id="adminPanel">
       <button onclick="toggleAddEvent()">Add Event</button>
+      <button onclick="toggleAddNews()">Add News</button>
       <button onclick="logout()">Logout</button>
     </div>
   </div>
 </header>
 
-<!-- LOGIN POPUP -->
+<!-- LOGIN -->
 <div id="loginPopup">
   <div class="popupContent">
-    <h3>Admin Login</h3>
+    <h3>Login</h3>
     <input id="user" placeholder="Username">
     <input id="pass" type="password" placeholder="Password">
     <button onclick="login()">Login</button>
@@ -139,144 +115,132 @@ button:hover { opacity:0.85; }
 
 <div class="container">
 
-  <!-- DESCRIPTION -->
-  <div class="card" style="text-align:center;">
-    <p>
-      Welcome to Speedy Monkes Event Hub! Here you can find all the upcoming events and news about speedy monkes!
-    </p>
-  </div>
+<!-- DESCRIPTION -->
+<div class="card" style="text-align:center;">
+Welcome to Speedy Monkes Event Hub! Here you can find all the upcoming events and news about speedy monkes!
+</div>
 
-  <!-- ADD EVENT -->
-  <div class="card" id="addEventCard">
-    <input id="name" placeholder="Event Name">
-    <input id="time" type="datetime-local">
-    <button onclick="addEvent()">Add Event</button>
-  </div>
+<!-- ADD NEWS -->
+<div class="card" id="addNewsCard" style="display:none;">
+<input id="newsTitle" placeholder="News Title">
+<textarea id="newsContent" placeholder="News Content"></textarea>
+<button onclick="addNews()">Post News</button>
+</div>
 
-  <!-- EVENTS -->
-  <div id="events"></div>
+<div id="news"></div>
+
+<!-- ADD EVENT -->
+<div class="card" id="addEventCard" style="display:none;">
+<input id="name" placeholder="Event Name">
+<input id="time" type="datetime-local">
+<button onclick="addEvent()">Add Event</button>
+</div>
+
+<div id="events"></div>
 
 </div>
 
-<script>
-const ADMINS = [
-  { user:"liamwalt", pass:"0nCr@cktbh." },
-  { user:"alex", pass:"ajwray69420wowHOLYSHIT!" }
-];
+<!-- FIREBASE SCRIPT -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-let events = JSON.parse(localStorage.getItem("events") || "[]");
+const firebaseConfig = {
+  apiKey: "AIzaSyDk2budp6cyBlqa1lWJUfkHPWvmyNRAJNo",
+  authDomain: "speedy-monkes-events.firebaseapp.com",
+  projectId: "speedy-monkes-events",
+  storageBucket: "speedy-monkes-events.firebasestorage.app",
+  messagingSenderId: "625005948158",
+  appId: "1:625005948158:web:e2b5b3e88ba10ba87909af"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const eventsRef = collection(db, "events");
+const newsRef = collection(db, "news");
+
 let loggedIn = false;
 
-/* POPUP */
-function openLogin(){
-  document.getElementById("loginPopup").style.display="flex";
-}
-function closeLogin(){
-  document.getElementById("loginPopup").style.display="none";
-}
+window.openLogin = () => loginPopup.style.display="flex";
+window.closeLogin = () => loginPopup.style.display="none";
 
-/* LOGIN */
-function login(){
-  const u=document.getElementById("user").value;
-  const p=document.getElementById("pass").value;
-
-  if(ADMINS.find(a=>a.user===u && a.pass===p)){
+window.login = () => {
+  if(user.value==="admin" && pass.value==="1234"){
     loggedIn=true;
     closeLogin();
-    document.getElementById("adminPanel").style.display="block";
-    alert("Logged in");
-    render();
-  } else {
-    alert("Wrong login");
-  }
-}
+    adminPanel.style.display="block";
+  } else alert("Wrong login");
+};
 
-function logout(){
+window.logout = () => {
   loggedIn=false;
-  document.getElementById("adminPanel").style.display="none";
-}
+  adminPanel.style.display="none";
+};
 
-/* ADMIN ACTIONS */
-function toggleAddEvent(){
-  const card=document.getElementById("addEventCard");
-  card.style.display = card.style.display==="none" ? "block" : "none";
-}
+window.toggleAddEvent = () => {
+  addEventCard.style.display = addEventCard.style.display==="none"?"block":"none";
+};
 
-function addEvent(){
-  const name=document.getElementById("name").value;
-  const time=document.getElementById("time").value;
-  if(!name || !time) return;
+window.toggleAddNews = () => {
+  addNewsCard.style.display = addNewsCard.style.display==="none"?"block":"none";
+};
 
-  events.push({ id:Date.now(), name, time });
-  localStorage.setItem("events", JSON.stringify(events));
+window.addEvent = async () => {
+  if(!name.value || !time.value) return;
+  await addDoc(eventsRef, { name:name.value, time:time.value });
+  name.value=""; time.value="";
+};
 
-  document.getElementById("name").value="";
-  document.getElementById("time").value="";
+window.deleteEvent = async (id) => {
+  await deleteDoc(doc(db,"events",id));
+};
 
-  render();
-}
-
-function deleteEvent(id){
-  events = events.filter(e=>e.id!==id);
-  localStorage.setItem("events", JSON.stringify(events));
-  render();
-}
-
-/* TIME */
-function getCountdown(t){
-  const diff=new Date(t)-new Date();
-  if(diff<=0) return "Started";
-
-  const d=Math.floor(diff/86400000);
-  const h=Math.floor(diff/3600000)%24;
-  const m=Math.floor(diff/60000)%60;
-  const s=Math.floor(diff/1000)%60;
-
-  return `${d}d ${h}h ${m}m ${s}s`;
-}
-
-function isNow(t){
-  return Math.abs(new Date()-new Date(t))<60000;
-}
-
-/* RENDER */
-function render(){
-  const container=document.getElementById("events");
-  container.innerHTML="";
-
-  const grouped={};
-  events.forEach(e=>{
-    const date=new Date(e.time).toDateString();
-    if(!grouped[date]) grouped[date]=[];
-    grouped[date].push(e);
+window.addNews = async () => {
+  if(!newsTitle.value || !newsContent.value) return;
+  await addDoc(newsRef, {
+    title:newsTitle.value,
+    content:newsContent.value,
+    date:new Date()
   });
+  newsTitle.value=""; newsContent.value="";
+};
 
-  for(let date in grouped){
-    const section=document.createElement("div");
-    section.className="card";
-    section.innerHTML=`<h3>${date}</h3>`;
+window.deleteNews = async (id) => {
+  await deleteDoc(doc(db,"news",id));
+};
 
-    grouped[date].forEach(e=>{
-      const div=document.createElement("div");
-      div.className="card";
+onSnapshot(eventsRef, snap => {
+  events.innerHTML="";
+  snap.forEach(docSnap => {
+    const e = docSnap.data();
+    const id = docSnap.id;
 
-      div.innerHTML=`
+    events.innerHTML += `
+      <div class="card">
         <b>${e.name}</b><br>
-        ${new Date(e.time).toLocaleTimeString()}<br>
-        <div class="countdown">Starts in: ${getCountdown(e.time)}</div>
-        ${isNow(e.time) ? `<div class="now">Event Happening Now!</div>` : ""}
-        ${loggedIn ? `<button class="delete" onclick="deleteEvent(${e.id})">Delete</button>` : ""}
-      `;
+        ${new Date(e.time).toLocaleString()}
+        ${loggedIn ? `<button onclick="deleteEvent('${id}')">Delete</button>` : ""}
+      </div>
+    `;
+  });
+});
 
-      section.appendChild(div);
-    });
+onSnapshot(newsRef, snap => {
+  news.innerHTML="";
+  snap.forEach(docSnap => {
+    const n = docSnap.data();
+    const id = docSnap.id;
 
-    container.appendChild(section);
-  }
-}
-
-setInterval(render,1000);
-render();
+    news.innerHTML += `
+      <div class="card">
+        <b>${n.title}</b><br>
+        <p>${n.content}</p>
+        ${loggedIn ? `<button onclick="deleteNews('${id}')">Delete</button>` : ""}
+      </div>
+    `;
+  });
+});
 </script>
 
 </body>
