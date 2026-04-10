@@ -139,22 +139,29 @@ button:hover { opacity:0.85; }
 
 <div class="container">
 
-<!-- ADD EVENT -->
-<div class="card" id="addEventCard">
-  <input id="name" placeholder="Event Name">
-  <input id="time" type="datetime-local">
-  <button onclick="addEvent()">Add Event</button>
-</div>
+  <!-- DESCRIPTION -->
+  <div class="card" style="text-align:center;">
+    <p>
+      Welcome to Speedy Monkes Event Hub! Here you can find all the upcoming events and news about speedy monkes!
+    </p>
+  </div>
 
-<!-- EVENTS -->
-<div id="events"></div>
+  <!-- ADD EVENT -->
+  <div class="card" id="addEventCard">
+    <input id="name" placeholder="Event Name">
+    <input id="time" type="datetime-local">
+    <button onclick="addEvent()">Add Event</button>
+  </div>
+
+  <!-- EVENTS -->
+  <div id="events"></div>
 
 </div>
 
 <script>
 const ADMINS = [
-  { user:"admin", pass:"1234" },
-  { user:"alex", pass:"5678" }
+  { user:"liamwalt", pass:"0nCr@cktbh." },
+  { user:"alex", pass:"alphaleadaonetotrust" }
 ];
 
 let events = JSON.parse(localStorage.getItem("events") || "[]");
