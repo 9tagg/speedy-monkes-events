@@ -4,45 +4,121 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Speedy Monkes V2 Events</title>
+
 <style>
-  body { margin:0; font-family: Arial, sans-serif; background:#0f172a; color:white; }
-  header { display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:#1e293b; position:sticky; top:0; z-index:10; }
-  header h1 { margin:0; font-size:24px; }
+body {
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#0f172a;
+  color:white;
+}
 
-  /* Admin label */
-  #adminLabel { cursor:pointer; padding:8px 12px; background:#3b82f6; border-radius:6px; }
-  #adminLabel:hover { background:#2563eb; }
+/* HEADER */
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 20px;
+  background:#1e293b;
+}
 
-  /* Admin panel popup */
-  #adminPanel { display:none; margin-top:10px; }
-  #adminPanel button { margin:5px 0; background:#3b82f6; color:white; border:none; border-radius:6px; padding:8px 12px; cursor:pointer; display:block; }
-  #adminPanel button:hover { background:#2563eb; }
+h1 { margin:0; }
 
-  .container { max-width:800px; margin:auto; padding:20px; }
+/* ADMIN BUTTON */
+#adminBtn {
+  cursor:pointer;
+  padding:8px 12px;
+  background:#3b82f6;
+  border-radius:6px;
+}
+#adminBtn:hover { background:#2563eb; }
 
-  .card { background:#1e293b; border-radius:12px; padding:15px; margin-top:15px; box-shadow:0 2px 10px rgba(0,0,0,0.3); transition:0.2s; }
-  .card:hover { transform: translateY(-2px); }
+/* ADMIN PANEL */
+#adminPanel {
+  display:none;
+  position:absolute;
+  right:20px;
+  top:60px;
+  background:#1e293b;
+  padding:10px;
+  border-radius:10px;
+}
+#adminPanel button {
+  display:block;
+  margin-top:5px;
+  width:100%;
+}
 
-  input { width:100%; padding:10px; margin:5px 0; border:none; border-radius:8px; background:#334155; color:white; }
-  button { cursor:pointer; border:none; border-radius:6px; padding:8px 12px; transition:0.2s; }
-  button:hover { opacity:0.85; }
-  .delete { background:#ef4444; color:white; }
-  .delete:hover { background:#dc2626; }
+/* POPUP */
+#loginPopup {
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.7);
+  justify-content:center;
+  align-items:center;
+}
+.popupContent {
+  background:#1e293b;
+  padding:20px;
+  border-radius:12px;
+  width:300px;
+  text-align:center;
+}
 
-  .countdown { color:#22d3ee; font-weight:bold; margin-top:5px; }
-  .now { color:#f87171; font-weight:bold; margin-top:5px; }
+/* MAIN */
+.container {
+  max-width:800px;
+  margin:auto;
+  padding:20px;
+}
 
-  #addEventCard { display:none; margin-top:10px; }
+.card {
+  background:#1e293b;
+  border-radius:12px;
+  padding:15px;
+  margin-top:15px;
+}
 
-  @media(max-width:600px){ header { flex-direction:column; align-items:flex-start; } }
+input, button {
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  margin:5px 0;
+}
+
+input {
+  width:100%;
+  background:#334155;
+  color:white;
+}
+
+button {
+  background:#3b82f6;
+  color:white;
+  cursor:pointer;
+}
+button:hover { opacity:0.85; }
+
+.delete { background:#ef4444; }
+.delete:hover { background:#dc2626; }
+
+.countdown { color:#22d3ee; }
+.now { color:#f87171; font-weight:bold; margin-top:5px; }
+
+#addEventCard { display:none; }
 </style>
 </head>
+
 <body>
 
 <header>
-  <h1>Speedy Monkes V2</h1>
-  <div>
-    <span id="adminLabel">Admin</span>
+  <h1>🐒 Speedy Monkes V2 Events</h1>
+
+  <div style="position:relative;">
+    <span id="adminBtn" onclick="openLogin()">Admin</span>
+
     <div id="adminPanel">
       <button onclick="toggleAddEvent()">Add Event</button>
       <button onclick="logout()">Logout</button>
@@ -50,24 +126,28 @@
   </div>
 </header>
 
-<div class="container">
-
-  <!-- LOGIN CARD -->
-  <div class="card" id="loginCard">
+<!-- LOGIN POPUP -->
+<div id="loginPopup">
+  <div class="popupContent">
+    <h3>Admin Login</h3>
     <input id="user" placeholder="Username">
     <input id="pass" type="password" placeholder="Password">
     <button onclick="login()">Login</button>
+    <button onclick="closeLogin()">Cancel</button>
   </div>
+</div>
 
-  <!-- ADD EVENT CARD -->
-  <div class="card" id="addEventCard">
-    <input id="name" placeholder="Event Name">
-    <input id="time" type="datetime-local">
-    <button onclick="addEvent()">Save Event</button>
-  </div>
+<div class="container">
 
-  <!-- EVENTS -->
-  <div id="events"></div>
+<!-- ADD EVENT -->
+<div class="card" id="addEventCard">
+  <input id="name" placeholder="Event Name">
+  <input id="time" type="datetime-local">
+  <button onclick="addEvent()">Add Event</button>
+</div>
+
+<!-- EVENTS -->
+<div id="events"></div>
 
 </div>
 
@@ -80,38 +160,52 @@ const ADMINS = [
 let events = JSON.parse(localStorage.getItem("events") || "[]");
 let loggedIn = false;
 
+/* POPUP */
+function openLogin(){
+  document.getElementById("loginPopup").style.display="flex";
+}
+function closeLogin(){
+  document.getElementById("loginPopup").style.display="none";
+}
+
+/* LOGIN */
 function login(){
   const u=document.getElementById("user").value;
   const p=document.getElementById("pass").value;
+
   if(ADMINS.find(a=>a.user===u && a.pass===p)){
     loggedIn=true;
-    document.getElementById("loginCard").style.display="none";
-    document.getElementById("adminPanel").style.display="block"; // show admin panel after login
-    alert("Logged in!");
+    closeLogin();
+    document.getElementById("adminPanel").style.display="block";
+    alert("Logged in");
     render();
-  } else alert("Wrong login");
+  } else {
+    alert("Wrong login");
+  }
 }
 
 function logout(){
   loggedIn=false;
   document.getElementById("adminPanel").style.display="none";
-  document.getElementById("loginCard").style.display="block";
-  document.getElementById("addEventCard").style.display="none";
 }
 
+/* ADMIN ACTIONS */
 function toggleAddEvent(){
   const card=document.getElementById("addEventCard");
-  card.style.display = card.style.display==="none"?"block":"none";
+  card.style.display = card.style.display==="none" ? "block" : "none";
 }
 
 function addEvent(){
-  const nameInput=document.getElementById("name");
-  const timeInput=document.getElementById("time");
-  if(!nameInput.value || !timeInput.value) return;
+  const name=document.getElementById("name").value;
+  const time=document.getElementById("time").value;
+  if(!name || !time) return;
 
-  events.push({ id:Date.now(), name:nameInput.value, time:timeInput.value });
+  events.push({ id:Date.now(), name, time });
   localStorage.setItem("events", JSON.stringify(events));
-  nameInput.value=""; timeInput.value="";
+
+  document.getElementById("name").value="";
+  document.getElementById("time").value="";
+
   render();
 }
 
@@ -121,13 +215,16 @@ function deleteEvent(id){
   render();
 }
 
+/* TIME */
 function getCountdown(t){
   const diff=new Date(t)-new Date();
   if(diff<=0) return "Started";
+
   const d=Math.floor(diff/86400000);
   const h=Math.floor(diff/3600000)%24;
   const m=Math.floor(diff/60000)%60;
   const s=Math.floor(diff/1000)%60;
+
   return `${d}d ${h}h ${m}m ${s}s`;
 }
 
@@ -135,9 +232,11 @@ function isNow(t){
   return Math.abs(new Date()-new Date(t))<60000;
 }
 
+/* RENDER */
 function render(){
   const container=document.getElementById("events");
   container.innerHTML="";
+
   const grouped={};
   events.forEach(e=>{
     const date=new Date(e.time).toDateString();
@@ -153,15 +252,18 @@ function render(){
     grouped[date].forEach(e=>{
       const div=document.createElement("div");
       div.className="card";
+
       div.innerHTML=`
         <b>${e.name}</b><br>
         ${new Date(e.time).toLocaleTimeString()}<br>
         <div class="countdown">Starts in: ${getCountdown(e.time)}</div>
-        ${isNow(e.time)?`<div class="now">Event Happening Now! Check announcements in Discord for the code!</div>`:""}
-        ${loggedIn?`<button class="delete" onclick="deleteEvent(${e.id})">Delete</button>`:""}
+        ${isNow(e.time) ? `<div class="now">Event Happening Now!</div>` : ""}
+        ${loggedIn ? `<button class="delete" onclick="deleteEvent(${e.id})">Delete</button>` : ""}
       `;
+
       section.appendChild(div);
     });
+
     container.appendChild(section);
   }
 }
